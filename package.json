@@ -1,6 +1,6 @@
 {
   "name": "cortico-world-gunsmith",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": false,
   "type": "module",
   "description": "桌宠改枪台：按地图、预算、风格挑三角洲配装，把改枪码放进剪贴板，并给出配件清单与属性变化。只读公开网页，不碰游戏进程。",
@@ -45,6 +45,7 @@
     "api": 6,
     "displayName": "桌宠改枪台",
     "describe": "describe.json",
+    "icon": "docs/icon.png",
     "tags": [
       "game",
       "internet"
