@@ -15,7 +15,7 @@
 - **本地库与口味学习**：`gunsmith-codes.json` 按码去重；`gunsmith-taste.json` 记录星级、吐槽、`avoidTags`；1~2 星自动避开对应风格标签
 - **按码反查元数据**：从剪贴板收来的码会回站点列表匹配，补上标签/地图/价格
 - **离线降级**：`readPublicPages: false` 纯本地库；磁盘缓存让断网时照常可用
-- **自检**：`tools/selfcheck.mjs`，离线 106 项 + 3 项联网
+- **自检**：`tools/selfcheck.mjs`，离线 111 项 + 3 项联网
 
 ### 边界（有意为之）
 

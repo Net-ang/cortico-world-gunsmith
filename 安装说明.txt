@@ -44,8 +44,8 @@
   World 页出现「桌宠改枪台」。
 
 先自检一下（可选）
-       node tools/selfcheck.mjs          离线 106 项
-       node tools/selfcheck.mjs --net    加上真站验证，109 项
+       node tools/selfcheck.mjs          离线 111 项
+       node tools/selfcheck.mjs --net    加上真站验证，114 项
 
 卸掉
        node tools/install-extension.mjs --uninstall --extensions "<同一个目录>"

@@ -1,6 +1,9 @@
 MIT License
 
-Copyright (c) 2026 cortico-world-gunsmith contributors
+Copyright (c) 2026 奶糖 (Net-ang)
+
+本许可覆盖本仓库的代码与文档。`data/gunsmith-catalog.json` 内的改枪方案数据来自
+shushu.fan 的公开页面，版权归该站点与分享方案的玩家，不适用本条许可——详见 data/NOTICE.md。
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

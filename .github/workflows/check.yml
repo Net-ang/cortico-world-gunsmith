@@ -1,0 +1,38 @@
+name: check
+
+# 每次推 main 或提 PR 都跑一遍离线自检（111 项，不联网，不依赖原生模块）。
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  selfcheck:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22', '24']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: 离线自检
+        run: node tools/selfcheck.mjs
+
+      - name: describe.json 与代码一致
+        run: |
+          set -euo pipefail
+          cp describe.json /tmp/describe.before.json
+          node tools/write-describe.mjs
+          if ! diff -q /tmp/describe.before.json describe.json; then
+            echo "::error::describe.json 和代码不一致，本地跑一次 node tools/write-describe.mjs 再提交"
+            diff -u /tmp/describe.before.json describe.json || true
+            exit 1
+          fi
+          echo "describe.json 与代码一致 ✓"

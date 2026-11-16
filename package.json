@@ -12,6 +12,15 @@
     "gunsmith"
   ],
   "license": "MIT",
+  "author": "奶糖 (Net-ang)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Net-ang/cortico-world-gunsmith.git"
+  },
+  "homepage": "https://github.com/Net-ang/cortico-world-gunsmith#readme",
+  "bugs": {
+    "url": "https://github.com/Net-ang/cortico-world-gunsmith/issues"
+  },
   "engines": {
     "node": ">=22"
   },

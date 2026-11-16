@@ -117,7 +117,7 @@ node tools/sync-catalog.mjs --out ... --limit 30
 ## 自检
 
 ```powershell
-node tools/selfcheck.mjs          # 68 项离线：契约 / 解析 / 本地库 / 口味 / 工具端到端
+node tools/selfcheck.mjs          # 111 项离线：契约 / 解析 / 本地库 / 口味 / 工具端到端 / 随包快照
 node tools/selfcheck.mjs --net    # 另抓一次真实公开页，验证站点没改版
 node tools/write-describe.mjs     # 改过工具或事件后重生成 describe.json
 ```

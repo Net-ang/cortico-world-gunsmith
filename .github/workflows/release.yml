@@ -1,0 +1,62 @@
+name: release
+
+# 推一个 v* 标签，GitHub 会自动跑自检、打包、建 Release 并挂上 zip/tgz。
+# 不需要本地凭据，也不需要手动上传。
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: 离线自检（111 项，不联网）
+        run: node tools/selfcheck.mjs
+
+      - name: 打包 tgz 与 zip
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          npm pack --pack-destination out
+          mv out/cortico-world-gunsmith-*.tgz "out/cortico-world-gunsmith-${TAG}.tgz"
+          zip -r -q "out/cortico-world-gunsmith-${TAG}.zip" . \
+            -x '*.git*' 'out/*' 'dist/*' 'node_modules/*'
+          ls -lh out
+
+      - name: 建 Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          gh release create "$TAG" out/* \
+            --title "桌宠改枪台 $TAG" \
+            --generate-notes \
+            --notes-file /dev/stdin <<'BODY'
+          ### 装
+
+          ```powershell
+          node tools/install-extension.mjs --extensions "<你的Coopanion>\data\extensions"
+          # 重启 Coopanion → World 页启用「桌宠改枪台」
+          ```
+
+          解压后的文件夹名是 `cortico-world-gunsmith-<版本>`，进去再跑上面那条命令。
+          **包里自带全库快照（1392 条方案），装上就能用，不用先跑同步。**
+
+          ### 数据来源
+
+          改枪方案与改枪码来自 shushu.fan 的**公开页面**（`robots.txt` 允许），版权归该站点与分享方案的玩家，
+          详见 `data/NOTICE.md`。本项目的 MIT 许可覆盖代码与文档，不覆盖那份数据。
+          BODY
