@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 0.1.1 — 2026-11-16
+
+发布物料与仓库收尾，功能与 0.1.0 一致。
+
+### 新增
+
+- **README 封面图**：`docs/preview.png`（鲸鱼娘端枪的尾帧特写），并加入 `files` 让 npm 页也能显示
+- `repository` / `homepage` / `bugs` / `author` 字段
+- **GitHub Actions**：`check.yml`（推 main / PR 跑离线自检 + 校验 describe.json 与代码一致）、`release.yml`（推 `v*` 标签自动打包并建 Release 挂 zip/tgz）
+- `tools/publish.ps1`：发布前校验 `keywords` 必须含 `cortico-world`（市场靠这个列包），新增 `-Otp` 参数与 EOTP 提示
+
+### 变更
+
+- LICENSE 版权行改为 `奶糖 (Net-ang)`，并注明 `data/` 里的方案数据不在 MIT 覆盖范围内
+- 文档里的自检项数更正为实测值（离线 111 / 联网 114）
+
 ## 0.1.0 — 2026-11-05
 
 首个版本。一个 Cortico/Coopanion World 扩展（`world api 6`），给桌宠加一个「改枪台」。
