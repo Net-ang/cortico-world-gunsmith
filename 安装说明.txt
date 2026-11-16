@@ -1,0 +1,72 @@
+桌宠改枪台 v0.1.0 · 安装说明
+================================
+
+这是什么
+  给 Coopanion（Cortico 桌宠）的扩展。你跟桌宠说「潮汐监狱 8W 以内压得住后坐力的步枪」，
+  它列出候选；你说「1」，改枪码就进你的剪贴板，你回游戏 Ctrl+V。
+  它还能按「图 + 难度」推荐：门槛是总战备，头甲胸挂背包也算，所以会算好枪价要多少。
+  它不检测游戏、不读画面/内存、不模拟键鼠，也不碰数据站的 /api/。
+
+⚠️ 关于数据
+  包里**自带一份改枪码目录快照**（data/gunsmith-catalog.json，约 1400 条），所以装上就能用全库，
+  不用先跑同步。它是快照，会过时；想要最新数据自己跑一次同步（见第 4 步，可选）。
+  数据来自 shushu.fan 的公开页面，版权归原站点与分享方案的玩家，详见 data/NOTICE.md。
+
+前提
+  Windows 10/11
+  Coopanion（World api 6，在 0.2.20 上验过）
+  Node.js 22 或更高
+
+三步装好（不用同步）
+  1) 解压出 cortico-world-gunsmith-0.1.0 文件夹
+  2) 打开 PowerShell，进到那个文件夹，跑：
+
+       node tools/install-extension.mjs --extensions "<你的Coopanion>\data\extensions"
+
+     不知道路径就找一下：
+       Get-ChildItem C:\ -Filter Coopanion.exe -Recurse -ErrorAction SilentlyContinue
+
+  3) 重启 Coopanion → World 页启用「桌宠改枪台」→ 信任窗口里确认
+
+  这样就有约 1400 条方案可搜（随包快照）。
+
+  4) 可选：想要最新数据就自己同步（约 30 分钟）
+
+       node tools/sync-catalog.mjs --out "<你的Coopanion>\data\home\companion\data\gunsmith-catalog.json"
+
+     本机同步出来的目录**优先于**随包快照，不会互相覆盖。跑完重启一次 Coopanion。
+     站点在更新方案时，随包快照里没有的新码就靠这次同步补上。
+
+装成功的样子
+  启动后日志（Coopanion\data\logs\core.log）里出现：
+       core: World 已启动: gunsmith
+  同步过的话还会有一行：全库目录 NNNN 条已载入
+  World 页出现「桌宠改枪台」。
+
+先自检一下（可选）
+       node tools/selfcheck.mjs          离线 106 项
+       node tools/selfcheck.mjs --net    加上真站验证，109 项
+
+卸掉
+       node tools/install-extension.mjs --uninstall --extensions "<同一个目录>"
+
+装脚本只做三件事：拷到 vendor/、在 extensions/package.json 加一条 link: 依赖、建 node_modules
+junction。会先备份成 package.json.bak-gunsmith，全部可逆。
+
+数据从哪来
+  shushu.fan 的公开页面：/guns 列表（20 条，带价格/地图/标签）、/guns/official/<id> 明细页
+  （1392 个，带改枪码和配件清单）、/kzb 卡战备（各图战备门槛 + 头甲胸挂背包成本）。
+  只读公开页，robots 里 Allow: /；不碰 /api/，不翻页，不后台轮询，缓存 60 分钟。
+  断网也能用磁盘缓存；配置里 readPublicPages: false 可完全离线。
+
+战备门槛（算的是总战备，头甲也算）
+  大坝 / 长弓 机密 11W    航天 / 巴克什 机密 18W
+  巴克什 绝密 55W         航天基地 绝密 60W      潮汐监狱 绝密 78W
+  普通无门槛。头甲那部分按站点同档位卡战备套装估（绝密取最贵那套），所以枪价要求比门槛低。
+
+隐私
+  它读剪贴板，但只在你让它「收一下」改枪码时读那一次；内容不像改枪码就当场拒绝、不入库、不上传。
+  因为读剪贴板，扩展市场可能给它打「读取隐私」标签——如实标注，不是下架。
+
+许可
+  MIT

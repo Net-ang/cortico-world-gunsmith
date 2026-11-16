@@ -1,0 +1,19 @@
+# 构建产物：发 GitHub Releases，不进仓库
+dist/
+
+# 依赖与临时
+node_modules/
+*.log
+.tmp-*/
+.tmp-check/
+
+# 本地跑出来的东西（数据目录里那份才是权威，仓库里带的是 data/ 快照）
+gunsmith-cache.json
+gunsmith-requirements.json
+gunsmith-codes.json
+gunsmith-taste.json
+
+# 系统垃圾
+.DS_Store
+Thumbs.db
+desktop.ini
