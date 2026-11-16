@@ -15,11 +15,13 @@
 param(
   [switch]$Go,
   [string]$Registry = 'https://registry.npmjs.org/',
-  [string]$Cache = ''
+  [string]$Cache = '',
+  [string]$Otp = ''
 )
 
 $ErrorActionPreference = 'Stop'
 $cacheArgs = if ($Cache) { @('--cache', $Cache, '--logs-dir', (Join-Path $Cache '_logs')) } else { @() }
+$otpArgs = if ($Otp) { @('--otp', $Otp) } else { @() }
 
 Push-Location (Split-Path $PSScriptRoot -Parent)
 try {
@@ -66,12 +68,25 @@ try {
   }
 
   Write-Host "`n[4/4] 发布到 npm" -ForegroundColor Yellow
+
+  # 关键：市场列包只看 keywords 里有没有 cortico-world（Coopanion extensions.ts:947），包名无所谓
+  $kw = @($pkg.keywords)
+  if ($kw -notcontains 'cortico-world') {
+    throw "package.json 的 keywords 里没有 cortico-world —— 这样发上去扩展广场也列不出来"
+  }
+  Write-Host "keywords 含 cortico-world ✓（市场按这个列包，不看名字）"
+
   $who = (& npm whoami --registry=$Registry @cacheArgs 2>&1 | Out-String)
   if ($LASTEXITCODE -ne 0) { throw "没登录：先跑 npm login --registry=$Registry" }
   Write-Host "已登录为: $($who.Trim())"
 
-  & npm publish --access public --registry=$Registry @cacheArgs
-  if ($LASTEXITCODE -ne 0) { throw 'npm publish 失败' }
+  & npm publish --access public --registry=$Registry @cacheArgs @otpArgs
+  if ($LASTEXITCODE -ne 0) {
+    Write-Host ''
+    Write-Host '如果报 EOTP / one-time password，说明账号开了两步验证，带上动态码重跑：' -ForegroundColor DarkYellow
+    Write-Host '  .\tools\publish.ps1 -Go -Otp 123456'
+    throw 'npm publish 失败'
+  }
 
   Write-Host "`n发布完成。" -ForegroundColor Green
   Write-Host '接下来：'

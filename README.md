@@ -1,5 +1,9 @@
 # 桌宠改枪台 · cortico-world-gunsmith
 
+<p align="center">
+  <img src="docs/preview.gif" alt="鲸鱼娘端着改好的枪" width="320">
+</p>
+
 Coopanion / Cortico 的 World 扩展（`world api 6`）。给桌宠加一件事：
 
 > **你说要什么枪、什么图、什么预算，它把方案和改枪码摆到你面前，把码放进剪贴板；Ctrl+V 是你自己按的。**
