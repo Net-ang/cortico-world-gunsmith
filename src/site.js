@@ -182,6 +182,17 @@ export const MAP_ALIASES = {
   AZ3: 'AZ3',
 };
 
+/**
+ * `/kzb` 里 `type` 分三类，得分开认：
+ *   武器槽位：`枪1` `枪2` `枪械1` `手枪`（无横杠）→ 算「枪」，进 guns 列表
+ *   枪上配件：`枪1-枪口` `枪1-瞄具` `战术设备`      → 属于枪，**不算头甲**
+ *   头甲胸挂背包：`头盔` `护甲` `背包` `胸挂`        → 算头甲，进 accessoryCost
+ * 早先 `/^枪/` 只用一个判断，结果是配件既进了 guns 列表、又被从 accessoryCost 里漏掉
+ * （漏掉是对的，进 guns 列表是错的）。所以这里拆成两个。
+ */
+const WEAPON_SLOT = /^(枪|枪械|手枪)\d*$/;
+const WEAPON_ITEM = /^(枪|枪械|手枪|近战)/;
+
 /** 把用户/站点嘴里的图名收敛成全称。认不出就原样返回。 */
 export function canonicalMap(name) {
   const n = String(name ?? '').replace(/\s+/g, '').trim();
@@ -231,7 +242,8 @@ export function parseLoadoutSets(html) {
   const all = extractJsonAfter(payload, 'allData', '[');
   if (!Array.isArray(all)) return { sets: [], accessoryCost: null };
 
-  const isGun = (type) => /^枪|^手枪|^枪械|^近战/.test(String(type ?? ''));
+  const isWeaponSlot = (type) => WEAPON_SLOT.test(String(type ?? ''));
+  const isWeaponItem = (type) => WEAPON_ITEM.test(String(type ?? ''));
   const sets = [];
   for (const group of all) {
     const rows = Array.isArray(group) ? group : [group];
@@ -249,14 +261,15 @@ export function parseLoadoutSets(html) {
       if (!priced.length) continue;
       const price = priced.reduce((s, it) => s + it.price, 0);
       const fake = Number(row?.cz) || 0;
-      const accessory = priced.filter((it) => !isGun(it.type));
+      const accessory = priced.filter((it) => !isWeaponItem(it.type));
       sets.push({
         price,
         fake,
         zhanbei: price - fake,
         accessoryCost: accessory.reduce((s, it) => s + it.price, 0),
         accessory: accessory.map((it) => `${it.name} ${(it.price / 10000).toFixed(1)}W`),
-        guns: priced.filter((it) => isGun(it.type)).map((it) => it.name),
+        // 站上主副武器同名会各列一次，展示时去重；配件不进 guns
+        guns: [...new Set(priced.filter((it) => isWeaponSlot(it.type)).map((it) => it.name))],
       });
     }
   }

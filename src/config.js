@@ -36,6 +36,12 @@ export const GUNSMITH_DEFAULTS = {
   accessoryMode: 'tiered',
   /** 硬性指定头甲占多少战备（哈夫币）；0 = 用站点数据推。 */
   accessoryBudget: 0,
+  /**
+   * 头甲最多认门槛的百分之几（默认 40）。
+   * 站上的卡战备套装是「便宜枪 + 极贵护甲」凑门槛的玩法，照抄会把枪价要求压到不现实
+   * （78W 门槛会算出「枪 25W 就够」），超出这个比例的部分不认。
+   */
+  accessoryCapPercent: 40,
   /** 全库目录文件路径；留空 = 用数据目录下的 gunsmith-catalog.json。可指向别人同步好的快照。 */
   catalogFile: '',
   /** 是否把随包自带的目录快照（data/gunsmith-catalog.json）当兜底数据源。 */
@@ -76,6 +82,8 @@ const TEXT = {
     accDesc: '手动指定头盔/护甲/胸挂/背包合计占多少战备。0 = 用站点卡战备套装自动估。',
     accModeTitle: '头甲估法',
     accModeDesc: 'tiered（绝密取最贵那套、机密取中位，推荐）/ median / max。',
+    accCapTitle: '头甲上限',
+    accCapDesc: '头甲最多认门槛的百分之几。站上套装常拿便宜枪配极贵护甲凑门槛，不设上限会把枪价要求压得不现实。',
     catalogTitle: '全库目录文件',
     catalogDesc: '留空 = 数据目录下的 gunsmith-catalog.json。也可以指向别人同步好的快照。',
     bundledTitle: '用随包快照兜底',
@@ -113,6 +121,8 @@ const TEXT = {
     accDesc: 'Fixed loadout-value share taken by helmet/armour/rig/backpack. 0 = estimate from the site\'s 卡战备 sets.',
     accModeTitle: 'Armour estimate',
     accModeDesc: 'tiered (priciest set for 绝密, median for 机密; recommended) / median / max.',
+    accCapTitle: 'Armour cap',
+    accCapDesc: 'Maximum share of the threshold the armour may take. The site\'s sets pair a cheap gun with very expensive armour to reach the number; without a cap the gun price requirement becomes unrealistic.',
     catalogTitle: 'Full catalog file',
     catalogDesc: 'Empty = gunsmith-catalog.json in the data directory. Point it at someone else\'s synced snapshot if you have one.',
     bundledTitle: 'Fall back to the bundled snapshot',
@@ -154,6 +164,7 @@ export function gunsmithConfigGroup(language) {
         'worlds.gunsmith.clipboardWrite': bool(t.clipWriteTitle, t.clipWriteDesc),
         'worlds.gunsmith.accessoryBudget': int(t.accTitle, t.accDesc, t.unitHaf, { minimum: 0 }),
         'worlds.gunsmith.accessoryMode': str(t.accModeTitle, t.accModeDesc),
+        'worlds.gunsmith.accessoryCapPercent': int(t.accCapTitle, t.accCapDesc, '%', { minimum: 0, maximum: 100 }),
         'worlds.gunsmith.catalogFile': str(t.catalogTitle, t.catalogDesc),
         'worlds.gunsmith.bundledCatalog': bool(t.bundledTitle, t.bundledDesc),
         'worlds.gunsmith.codePattern': str(t.patternTitle, t.patternDesc),

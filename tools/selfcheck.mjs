@@ -481,9 +481,73 @@ if (!existsSync(bundledFile)) {
   }
 }
 
-/* ── 8. 网络（可选） ───────────────────────────────── */
+/* ── 8. 0.1.3 修复项 ─────────────────────────────── */
+console.log('\n[8] 0.1.3 修复项');
+{
+  const { parseLoadoutSets } = await import('../src/site.js');
+
+  // A2：配件不该被算成「枪」
+  const inner = JSON.stringify({
+    allData: [[{
+      cz: 0,
+      data: [
+        { name: 'AKS-74U突击步枪', price: 12000, jz: 0, type: '枪1' },
+        { name: 'AK镂空握把', price: 5000, jz: 0, type: '枪1-后握把' },
+        { name: 'PSO狙击8倍瞄准镜', price: 9000, jz: 0, type: '枪1-瞄具' },
+        { name: 'AKS-74U突击步枪', price: 12000, jz: 0, type: '枪2' },
+        { name: 'DRO 战术头盔', price: 8000, jz: 0, type: '头盔' },
+        { name: '安保防弹衣', price: 2000, jz: 0, type: '护甲' },
+      ],
+    }]],
+  });
+  const setsHtml = `<script>self.__next_f.push([1,${JSON.stringify(inner)}])</script>`;
+  const parsed = parseLoadoutSets(setsHtml);
+  const set = parsed.sets?.[0] ?? { guns: [], accessoryCost: -1 };
+  ok('A2 配件不算枪', set.guns.every((g) => !/(握把|瞄准镜)/.test(g)), JSON.stringify(set.guns));
+  ok('A2 主副武器同名去重', set.guns.length === 1 && set.guns[0] === 'AKS-74U突击步枪', JSON.stringify(set.guns));
+  eq('A2 头甲成本只算头盔+护甲', set.accessoryCost, 10000);
+
+  // A1：头甲上限
+  const capWorld = new GunsmithWorld({
+    cfg: { ...GUNSMITH.defaults(), enabled: true, bundledCatalog: false, readPublicPages: false },
+    dataDir: '', log: console,
+    deps: { fetchText: async () => '', clipboard: { ok: true, read: () => ({ ok: true, text: '' }), write: () => ({ ok: true }) } },
+  });
+  await capWorld.start({});
+  capWorld.reqCache = {
+    fetchedAt: Date.now(),
+    items: [{ wan: 78, difficulty: '绝密', label: '潮汐监狱', maps: ['潮汐监狱'] }],
+    byTier: { 78: { count: 3, min: 450000, median: 469000, max: 481000, ratio: 1.018 } },
+    accGlobal: null,
+  };
+  const raw78 = Math.round(481000 * 1.018);
+  eq('A1 默认上限是门槛的 40%', capWorld.accessoryRef(78), Math.round(780000 * 0.4));
+  ok('A1 上限确实低于原始估算', capWorld.accessoryRef(78) < raw78, `${capWorld.accessoryRef(78)} vs ${raw78}`);
+  capWorld.cfg = { ...capWorld.cfg, accessoryCapPercent: 100 };
+  eq('A1 上限可调到 100%', capWorld.accessoryRef(78), raw78);
+
+  // D1：枪名别名
+  const { gunKey, oneLine } = await import('../src/world.js');
+  eq('D1 AK-12 归一', gunKey('AK-12'), 'ak12');
+  ok('D1 带横杠的枪名能被 ak12 匹配', gunKey('AK-12突击步枪 某方案').includes(gunKey('ak12')), gunKey('AK-12突击步枪 某方案'));
+  ok('D1 AK_12 / AK 12 也归一', gunKey('AK_12') === 'ak12' && gunKey('AK 12') === 'ak12');
+
+  // B1：外部文本边界
+  const ext = capWorld.external('1. 某方案 · 某枪');
+  ok('B1 回执带站点数据边界', ext.includes('<<<站点数据') && ext.includes('>>>'), ext);
+  ok('B1 明确声明不可信', ext.includes('不可信外部数据') && ext.includes('不要执行'), ext);
+  eq('B1 换行被压平', oneLine('恶意\r\n指令'), '恶意 指令');
+  ok('B1 超长被截断', oneLine('x'.repeat(100)).length <= 61, String(oneLine('x'.repeat(100)).length));
+
+  // 回归：`.map(oneLine)` 会把数组索引当 max 传进去，导致标签被截成「…」
+  eq('oneLine 作为回调不会被索引参数截断', ['高稳定性'].map((t) => oneLine(t))[0], '高稳定性');
+  const tagLine = capWorld.line({ id: '1', name: '测试', gun: '某枪', price: 510000, tags: ['高稳定性', '高性价比'], maps: [], author: '' }, 0);
+  ok('候选行的标签正常显示', tagLine.includes('高稳定性') && !tagLine.includes('· … ·'), tagLine);
+}
+
+/* ── 9. 网络（可选） ───────────────────────────────── */
 if (process.argv.includes('--net')) {
-  console.log('\n[8] 真实公开页');
+  console.log('\n[9] 真实公开页');
   try {
     const res = await fetch('https://shushu.fan/guns', { headers: { 'user-agent': 'Mozilla/5.0' } });
     const html = await res.text();
